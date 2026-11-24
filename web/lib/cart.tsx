@@ -1,9 +1,11 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/lib/auth";
 import type { CartItem, Dish } from "@/lib/types";
 
 const CART_KEY = "platoya.cart";
+const OWNER_KEY = "platoya.cart.owner";
 
 type CartContextValue = {
   items: CartItem[];
@@ -36,6 +38,7 @@ function isCartItem(value: unknown): value is CartItem {
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [ready, setReady] = useState(false);
+  const { user, ready: authReady } = useAuth();
 
   useEffect(() => {
     try {
@@ -46,6 +49,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
     setReady(true);
   }, []);
+
+  // El carrito es de una persona. Si la sesión se cierra, expira o entra otra cuenta,
+  // se vacía para que la siguiente persona no vea platos ajenos.
+  // Un carrito de visitante (sin dueño) lo adopta quien inicia sesión para poder pagar.
+  useEffect(() => {
+    if (!ready || !authReady) return;
+    try {
+      const owner = localStorage.getItem(OWNER_KEY);
+      if (user) {
+        if (owner && owner !== user.id) setItems([]);
+        localStorage.setItem(OWNER_KEY, user.id);
+      } else if (owner) {
+        setItems([]);
+        localStorage.removeItem(OWNER_KEY);
+      }
+    } catch {
+      // Si el almacenamiento no está disponible, el carrito solo vive en memoria.
+    }
+  }, [user, ready, authReady]);
 
   useEffect(() => {
     if (!ready) return;
