@@ -27,6 +27,11 @@ export function Nav() {
               Pedidos
             </Link>
           ) : null}
+          {ready && user?.role === "cook" ? (
+            <Link href="/cocina" className="hover:text-clay">
+              Cocina
+            </Link>
+          ) : null}
           {ready && user ? (
             <>
               <span className="text-stone-600">

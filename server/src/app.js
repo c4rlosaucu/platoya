@@ -7,7 +7,9 @@ import { config } from "./config.js";
 import { errorHandler } from "./middleware/error.js";
 import { authRouter } from "./routes/auth.js";
 import { dishesRouter } from "./routes/dishes.js";
+import { kitchenRouter } from "./routes/kitchen.js";
 import { ordersRouter } from "./routes/orders.js";
+import { paymentsRouter } from "./routes/payments.js";
 
 export function createApp() {
   const app = express();
@@ -42,6 +44,8 @@ export function createApp() {
   app.use("/api/auth", authRouter);
   app.use("/api/dishes", dishesRouter);
   app.use("/api/orders", ordersRouter);
+  app.use("/api/payments", paymentsRouter);
+  app.use("/api/kitchen", kitchenRouter);
 
   app.use((req, res) => {
     res.status(404).json({ error: { code: "NOT_FOUND", message: "Ruta no encontrada" } });

@@ -27,8 +27,9 @@ function LoginForm() {
     setPending(true);
     setError("");
     try {
-      await login(email, password);
-      router.push(safeNext(params.get("next")));
+      const signedIn = await login(email, password);
+      const next = params.get("next");
+      router.push(next ? safeNext(next) : signedIn.role === "cook" ? "/cocina" : "/");
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : "No se pudo entrar");
     } finally {

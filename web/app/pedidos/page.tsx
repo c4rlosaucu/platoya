@@ -1,24 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { ApiError, api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { formatUsd, formatWhen } from "@/lib/format";
+import { useOrderEvents } from "@/lib/socket";
 import type { Order } from "@/lib/types";
 
 export default function OrdersPage() {
   const { user, token, ready } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [error, setError] = useState("");
+  const isCustomer = user?.role === "customer";
 
-  useEffect(() => {
-    if (!ready || !token || user?.role !== "customer") return;
+  const load = useCallback(() => {
+    if (!token) return;
     api<{ orders: Order[] }>("/api/orders", { token })
       .then((data) => setOrders(data.orders))
       .catch((caught) => setError(caught instanceof ApiError ? caught.message : "No se pudieron cargar los pedidos"));
-  }, [ready, token, user]);
+  }, [token]);
+
+  useEffect(() => {
+    if (ready && isCustomer) load();
+  }, [ready, isCustomer, load]);
+
+  // Cuando la cocina cambia un estado, el historial se actualiza sin recargar.
+  useOrderEvents(isCustomer ? token : null, load);
 
   if (!ready) return <main className="px-4 py-16">Cargando…</main>;
   if (!user) {
@@ -31,7 +40,7 @@ export default function OrdersPage() {
       </main>
     );
   }
-  if (user.role !== "customer") {
+  if (!isCustomer) {
     return (
       <main className="mx-auto max-w-xl px-4 py-16">
         <h1 className="font-serif text-5xl">Historial de clientes</h1>
