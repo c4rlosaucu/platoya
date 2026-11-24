@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+  --color-ink: #1c1915;
+  --color-paper: #f3eee4;
+  --color-card: #fffaf3;
+  --color-line: #e3d5c4;
+  --color-clay: #c2410c;
+  --color-clay-dark: #9a3412;
+  --color-moss: #1f4d3a;
+  --color-moss-soft: #e6f0ea;
+  --color-gold: #a16207;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgb(194 65 12 / 0.08), transparent 32rem),
+    var(--color-paper);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-clay);
+  outline-offset: 3px;
+}
